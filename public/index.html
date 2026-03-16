@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>David Zamarin | AI Chief of Staff OS - Built for Wrapbook</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #F9FAFB; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .animate-fade-in { animation: fadeIn 0.4s ease forwards; }
+    input:focus { border-color: #6733FF !important; box-shadow: 0 0 0 3px rgba(103,51,255,0.1) !important; }
+    button:hover { filter: brightness(1.05); }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 3px; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    const PURPLE = '#6733FF';
+    const PURPLE_LIGHT = '#8B5CF6';
+    const PURPLE_BG = 'rgba(103, 51, 255, 0.08)';
+
+    const MOCK_OKRS = [
+      { obj: 'Scale payroll processing 3x with AI-powered AP automation', progress: 72, status: 'on-track', owner: 'Engineering', lead: 'Naysawn Naji', role: 'Co-Founder & CIO', email: 'naysawn@wrapbook.com', context: 'Aligned with Oct 2025 AP automation launch - AI invoice processing already reducing manual entry for early adopters like Paramount and Unrealistic Ideas.' },
+      { obj: 'Launch Rate Finder V2 with predictive labor cost modeling', progress: 45, status: 'at-risk', owner: 'Product', lead: 'Product Lead', role: 'VP Product', email: 'product@wrapbook.com', context: 'Building on the Rate Finder tool launched Aug 2025 (covered by Deadline). V2 adds predictive modeling on top of union scale rate search. At risk due to SAG-AFTRA contract expiration Mar 31, 2026 - new rates needed before launch.' },
+      { obj: 'Expand to 5 new union & guild agreements', progress: 88, status: 'on-track', owner: 'Compliance', lead: 'Compliance Lead', role: 'Head of Compliance', email: 'compliance@wrapbook.com', context: 'Strong momentum. 2025 SAG-AFTRA Commercials Contract already integrated. New Interactive Media Agreement (AI/digital replica provisions) in progress. DGA and Teamsters agreements on deck.' },
+      { obj: 'Reduce crew onboarding time by 50% (4.2 → 2.1 days)', progress: 31, status: 'behind', owner: 'Operations', lead: 'Operations Lead', role: 'VP Operations', email: 'operations@wrapbook.com', context: 'Currently at 2.8 days (down from 4.2). Wrapbook 2026 report shows 80%+ of teams still rely on email and manual entry - largest remaining blocker is production company adoption of digital onboarding flows.' },
+      { obj: 'Close 3 major studio enterprise deals ($500K+ ACV each)', progress: 63, status: 'on-track', owner: 'Sales', lead: 'Jeff Caruso', role: 'SVP, Studio Sales & Success', email: 'jeff@wrapbook.com', context: 'New SVP hire leading enterprise push. Pipeline at 2.3x target. Cinapse acquisition (Dec 2025) strengthening production accounting pitch. California tax incentive doubling driving studio interest.' },
+    ];
+
+    const MOCK_INITIATIVES = [
+      { name: 'AI-Powered AP Command Center', status: 'In Progress', priority: 'P0', teams: ['Engineering', 'Product', 'AI'], dueDate: 'Q2 2026', sponsor: 'Ali Javid, CEO', desc: 'Extending the AI invoice processing and vendor verification launched Oct 2025. Goal: fully automated AP workflow from PO to payment. Early results from Paramount and Unrealistic Ideas show "noticeably simpler" invoice processing.', blockers: 'None - on track' },
+      { name: 'SAG-AFTRA 2026 Contract Transition', status: 'Urgent', priority: 'P0', teams: ['Compliance', 'Engineering', 'Product'], dueDate: 'Apr 1, 2026', sponsor: 'Compliance Lead', desc: '2025 Commercials Contract expires March 31, 2026. New digital replica/AI reporting requirements (30-day synthetic performer disclosure, 1.5x session fees). Rate Finder needs updated rates. Interactive Media Agreement AI provisions must be integrated.', blockers: 'Waiting on final SAG-AFTRA rate tables for 2026 cycle' },
+      { name: 'Cinapse Integration', status: 'In Progress', priority: 'P1', teams: ['Engineering', 'Product', 'Operations'], dueDate: 'Q2 2026', sponsor: 'Naysawn Naji, CIO', desc: 'Integrating Cinapse (acquired Dec 2025) into Wrapbook platform. Strengthens production accounting capabilities - key differentiator vs. Cast & Crew. Addresses the "disconnected systems" problem cited by 64% of finance leaders in our 2026 report.', blockers: 'Data migration timeline TBD' },
+      { name: 'California Production Incentive Automation', status: 'Planning', priority: 'P1', teams: ['Product', 'Compliance', 'Sales'], dueDate: 'Q3 2026', sponsor: 'Jeff Caruso, SVP Sales', desc: 'California doubled its annual tax incentive cap - studios announcing major productions (Heat 2, Jumanji). Opportunity to automate incentive compliance tracking as a first-mover. Sales team needs this for enterprise deal acceleration.', blockers: 'Scope definition in progress' },
+      { name: 'Production Finance Dashboard V2', status: 'Scoping', priority: 'P2', teams: ['Product', 'Design', 'Data'], dueDate: 'Q4 2026', sponsor: 'Cameron Woodward, CMO', desc: 'CEO Ali Javid: "What this research highlights is a systems problem, not a people problem." V2 addresses the 64% who cite disconnected systems as #1 barrier to cash flow prediction. Unified real-time view across payroll, AP, and accounting.', blockers: 'Dependent on Cinapse integration completion' },
+    ];
+
+    const BRIEFING_SECTIONS = [
+      {
+        title: 'Critical Items Requiring Attention', icon: '🔴', borderColor: '#FCA5A5',
+        items: [
+          '**SAG-AFTRA 2026 Contract Transition (Deadline: April 1)**: The 2025 Commercials Contract expires March 31, 2026. New digital replica and AI reporting provisions require system updates - producers must disclose synthetic performer use within 30 days of air date and pay 1.5x session fees. Engineering needs to prioritize Rate Finder updates with new rate tables. Recommend Ali sync with VP Eng today to confirm sprint allocation.',
+          '**Industry headwinds - production volume at pandemic lows**: Q3 2025 production volume was the lowest since COVID. US Movie & Video Production revenue estimated to fall 8.2% CAGR to $42B through 2026. Our 2026 State of Production Finance report confirms nearly 90% of clients cite tightening budgets as their #1 concern. Finance should model conservative payroll volume scenarios for Q3.',
+        ],
+      },
+      {
+        title: 'Cross-Functional Updates', icon: '🔄', borderColor: PURPLE_LIGHT,
+        items: [
+          '**Product + Engineering (Naysawn Naji, CIO)**: AI AP Command Center showing strong early results - Ciria Cordero at Unrealistic Ideas reports "invoice processing is noticeably simpler," Raymond Arturo Perez at Paramount calls it "fabulous." Cinapse integration (acquired Dec 2025) on track for Q2 - addresses the 64% of finance leaders who cite disconnected systems as #1 barrier to cash flow prediction.',
+          '**Sales (Jeff Caruso, SVP Studio Sales)**: Pipeline at 2.3x target. California doubling its annual tax incentive cap is driving major studio interest - Heat 2 and Jumanji confirmed to shoot in-state. Three enterprise deals ($500K+ ACV) in final stages. Jeff needs expedited legal review on custom SLA terms.',
+          '**Marketing (Cameron Woodward, CMO)**: 2026 State of Production Finance report just published - strong PR coverage, 100 respondent base. Recommend leveraging Ali\'s quote ("this is a systems problem, not a people problem") as LinkedIn thought leadership content this week. Also: competitor Cast & Crew experiencing recurring outage issues - arm AEs with competitive talking points.',
+        ],
+      },
+      {
+        title: 'Opportunities to Highlight', icon: '🟢', borderColor: '#6EE7B7',
+        items: [
+          '**California incentive automation**: The doubled tax incentive cap is attracting major productions back to CA (state spend was $1.5B last year). First-mover opportunity to automate incentive compliance tracking - no competitor offers this. Product should scope with Jeff\'s team this week.',
+          '**AI/Digital replica compliance as differentiator**: SAG-AFTRA\'s new Interactive Media Agreement requires "clear and conspicuous" disclosure for digital replicas plus employer usage reports within 90 days. Studios need tooling for this - Wrapbook can be the platform of record. Aligns with the industry trend: generative AI is transforming production workflows, but compliance is the bottleneck.',
+          '**Creator economy expansion**: Boundaries between Hollywood and the creator economy are dissolving (per industry reports). Studios embracing creators as talent opens a new segment of smaller, higher-frequency productions - ideal for Wrapbook\'s transactional pricing model.',
+        ],
+      },
+      {
+        title: "This Week's Leadership Priorities", icon: '📋', borderColor: '#E5E7EB',
+        items: [
+          'Monday: Finalize Q3 OKRs - incorporate conservative volume scenarios given industry production slowdown. Key narrative: win share in a contracting market through AI differentiation.',
+          'Wednesday: Board prep - lead with 2026 report data (90% budget pressure stat), Cinapse integration progress, and enterprise pipeline strength. Frame AI AP automation as the moat.',
+          'Friday: All-hands - Ali should spotlight customer testimonials from Paramount and Unrealistic Ideas. Morale matters when industry is in a downturn - show the team we\'re winning despite headwinds.',
+        ],
+      },
+    ];
+
+    const CHAT_RESPONSES = {
+      compliance: `Based on cross-functional data and recent industry developments, here are the top compliance risks:\n\n**1. SAG-AFTRA 2026 Contract Transition (CRITICAL)**\nThe 2025 Commercials Contract expires March 31, 2026 - 15 days away. Key changes:\n• Digital replica: producers must disclose synthetic performer use within 30 days of air date\n• AI compensation: 1.5x session fees when Synthetic Performers are used alongside human performers\n• Interactive Media: "clear and conspicuous" written consent required for digital replicas, plus employer usage reports within 90 days of release\n• Rate Finder needs updated 2026 rate tables before April 1\n\n**Owner:** Compliance Lead + Naysawn Naji (CIO)\n**Recommendation:** Escalate to Ali Javid for CEO-VP Eng sync today. Rate Finder update must be in next sprint.\n\n**2. California AB-5 Worker Reclassification (MEDIUM)**\nThree enterprise pipeline clients flagged for potential misclassification. With CA doubling tax incentives and major productions (Heat 2, Jumanji) returning to the state, AB-5 scrutiny will increase.\n\n**Owner:** Legal\n\n**3. Canadian Payroll Tax Updates (LOW)**\nNew BC and Ontario withholding requirements. Tax engine update shipping next week - on track.`,
+      initiative: `Here's the status of our top 3 cross-functional initiatives:\n\n**🔴 SAG-AFTRA 2026 Contract Transition (P0)**\n• Deadline: April 1, 2026 (15 days)\n• Sponsor: Compliance Lead\n• Blocker: Waiting on final 2026 rate tables from SAG-AFTRA\n• Action needed: Engineering sprint allocation for Rate Finder update\n• Context: New AI/digital replica provisions create both compliance risk and product opportunity\n\n**🟢 AI-Powered AP Command Center (P0)**\n• Progress: On track for Q2 launch\n• Sponsor: Ali Javid, CEO\n• Results: Paramount ("fabulous"), Unrealistic Ideas ("noticeably simpler")\n• Next milestone: Expand from invoice processing to full PO-to-payment automation\n\n**🟡 Cinapse Integration (P1)**\n• Progress: In progress, Q2 target\n• Sponsor: Naysawn Naji, CIO\n• Acquired Dec 2025 - strengthens production accounting\n• Addresses #1 pain point: 64% of finance leaders cite disconnected systems as biggest barrier (per our 2026 report)\n• Blocker: Data migration timeline TBD`,
+      budget: `Here's the current financial picture with industry context:\n\n**Macro Context: Industry Under Pressure**\n• US production volume at lowest since the pandemic (Q3 2025)\n• Industry revenue falling at 8.2% CAGR to $42B through 2026\n• Our 2026 report: nearly 90% of clients cite tightening budgets as #1 concern\n• Studios investing in lower-budget, higher-margin projects and franchise content\n\n**Wrapbook Revenue: $12.4M processed** (↑ 23% QoQ)\n• Growing despite industry contraction - taking market share\n• New enterprise deals (Jeff Caruso's pipeline at 2.3x target) driving volume\n• Transactional revenue trending $800K above target\n• Cinapse acquisition strengthening enterprise value prop\n\n**Cost Variance: +12% over forecast**\n• Infrastructure scaling for 3 new enterprise clients\n• Accelerated hiring in Customer Success (+2 FTEs)\n\n**Recommendation:**\nFrame for the board as "winning share in a contracting market." As Ali said in the 2026 report: "This is a systems problem, not a people problem." Our AI automation is the differentiator. Suggest reforecasting with conservative Q3 volume scenarios but bullish on enterprise ACV growth.`,
+      industry: `Here's what's happening in the entertainment industry right now:\n\n**Production Volume & Spending**\n• Q3 2025 production volume was the lowest since the pandemic\n• US Movie & Video Production revenue: falling 8.2% CAGR to $42B\n• California production spend fell YoY to $1.5B - but the state doubled its tax incentive cap, attracting Heat 2 and Jumanji\n\n**AI Transformation**\n• Generative video breakthroughs transforming production workflows\n• SAG-AFTRA establishing new standards: digital replica consent, synthetic performer fees, usage reporting\n• Studios and creators navigating authenticity, labor, and environmental concerns\n\n**Content Strategy Shifts**\n• Studios recalibrating toward franchise + faith-forward content\n• Creator economy dissolving boundaries with traditional Hollywood\n• Streaming embracing hybrid subscription + advertising models\n\n**What This Means for Wrapbook**\n• Cost pressure drives demand for our automation (90% cite tightening budgets)\n• AI compliance is a greenfield opportunity - no competitor offers it\n• California incentive automation could be a first-mover play\n• Creator economy = more productions, smaller budgets = perfect for transactional pricing`,
+      default: `I'm your AI Chief of Staff. I synthesize cross-functional data from across Wrapbook - compliance, finance, product, engineering, sales, and industry trends.\n\nHere are some things I can help with:\n• **"What are our compliance risks?"** - SAG-AFTRA, AB-5, union changes\n• **"Status of our initiatives"** - AP automation, Cinapse, Rate Finder\n• **"How's the budget looking?"** - Revenue, costs, board framing\n• **"What's happening in the industry?"** - Production trends, AI regulation, studio spending\n• **"Who owns this?"** - Accountable leads and contact info for any initiative\n\nI pull from Wrapbook's 2026 State of Production Finance report, recent product launches, SAG-AFTRA contract updates, and industry data.\n\nWhat would you like to know?`,
+    };
+
+    function getResponse(input) {
+      const lower = input.toLowerCase();
+      if (lower.includes('compliance') || lower.includes('risk') || lower.includes('union') || lower.includes('sag') || lower.includes('replica')) return CHAT_RESPONSES.compliance;
+      if (lower.includes('initiative') || lower.includes('status') || lower.includes('project') || lower.includes('top 3') || lower.includes('cinapse')) return CHAT_RESPONSES.initiative;
+      if (lower.includes('budget') || lower.includes('cost') || lower.includes('revenue') || lower.includes('finance') || lower.includes('spend') || lower.includes('money')) return CHAT_RESPONSES.budget;
+      if (lower.includes('industry') || lower.includes('trend') || lower.includes('market') || lower.includes('hollywood') || lower.includes('production volume') || lower.includes('studio')) return CHAT_RESPONSES.industry;
+      return CHAT_RESPONSES.default;
+    }
+
+    function renderMarkdown(text) {
+      return text.split('\n').map((line, i) => {
+        const boldParsed = line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        if (line.startsWith('• ') || line.startsWith('- ')) {
+          return <div key={i} style={{ paddingLeft: 16, marginBottom: 2 }} dangerouslySetInnerHTML={{ __html: '• ' + boldParsed.slice(2) }} />;
+        }
+        if (line === '') return <br key={i} />;
+        return <div key={i} style={{ marginBottom: 2 }} dangerouslySetInnerHTML={{ __html: boldParsed }} />;
+      });
+    }
+
+    function StatusBadge({ status }) {
+      const colors = {
+        'on-track': { bg: '#ECFDF5', text: '#059669', label: 'On Track' },
+        'at-risk': { bg: '#FFF7ED', text: '#EA580C', label: 'At Risk' },
+        behind: { bg: '#FEF2F2', text: '#DC2626', label: 'Behind' },
+      };
+      const c = colors[status];
+      return <span style={{ background: c.bg, color: c.text, padding: '2px 10px', borderRadius: 99, fontSize: 12, fontWeight: 600 }}>{c.label}</span>;
+    }
+
+    function PriorityBadge({ priority }) {
+      const colors = { P0: '#DC2626', P1: '#EA580C', P2: '#6733FF' };
+      return <span style={{ background: colors[priority] || '#888', color: '#fff', padding: '2px 8px', borderRadius: 4, fontSize: 11, fontWeight: 700 }}>{priority}</span>;
+    }
+
+    function ProgressBar({ value }) {
+      const [width, setWidth] = useState(0);
+      useEffect(() => { const t = setTimeout(() => setWidth(value), 100); return () => clearTimeout(t); }, [value]);
+      return (
+        <div style={{ background: '#E5E7EB', borderRadius: 99, height: 6, width: '100%', overflow: 'hidden' }}>
+          <div style={{ background: value >= 70 ? '#059669' : value >= 40 ? '#EA580C' : '#DC2626', height: '100%', width: `${width}%`, borderRadius: 99, transition: 'width 1.2s cubic-bezier(0.4, 0, 0.2, 1)' }} />
+        </div>
+      );
+    }
+
+    function NavButton({ label, icon, active, onClick }) {
+      const [hovered, setHovered] = useState(false);
+      return (
+        <button onClick={onClick} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
+          style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', borderRadius: 8, border: 'none', cursor: 'pointer', width: '100%', textAlign: 'left', background: active ? PURPLE_BG : hovered ? '#F3F4F6' : 'transparent', color: active ? PURPLE : '#6B7280', fontWeight: active ? 600 : 400, fontSize: 14, transition: 'all 0.15s' }}>
+          <span style={{ fontSize: 18 }}>{icon}</span>{label}
+        </button>
+      );
+    }
+
+    // ─── Briefing Tab ────────────────────────────────────
+    function BriefingTab() {
+      const [generated, setGenerated] = useState(false);
+      const [revealing, setRevealing] = useState(-1);
+      const [loading, setLoading] = useState(false);
+
+      function generate() {
+        setLoading(true);
+        setTimeout(() => { setLoading(false); setGenerated(true); setRevealing(0); }, 1500);
+      }
+
+      useEffect(() => {
+        if (revealing >= 0 && revealing < BRIEFING_SECTIONS.length) {
+          const timer = setTimeout(() => setRevealing(revealing + 1), 600);
+          return () => clearTimeout(timer);
+        }
+      }, [revealing]);
+
+      return (
+        <div>
+          <div style={{ marginBottom: 24 }}>
+            <h2 style={{ fontSize: 24, fontWeight: 700, color: '#111', margin: 0 }}>AI Morning Briefing</h2>
+            <p style={{ color: '#6B7280', fontSize: 14, marginTop: 6 }}>One-click executive briefing synthesized from cross-functional data, OKRs, and initiative status.</p>
+          </div>
+          {!generated ? (
+            <div style={{ textAlign: 'center', padding: '80px 20px' }}>
+              <div style={{ fontSize: 56, marginBottom: 20 }}>🌅</div>
+              <h3 style={{ fontSize: 20, fontWeight: 600, color: '#111', marginBottom: 8 }}>
+                {loading ? 'Synthesizing cross-functional data...' : "Ready to generate today's briefing"}
+              </h3>
+              <p style={{ color: '#6B7280', fontSize: 14, marginBottom: 28, maxWidth: 440, margin: '0 auto 28px' }}>
+                {loading ? 'Analyzing OKRs, initiative updates, compliance items, and financial data...' : 'AI synthesizes OKR progress, cross-functional updates, risks, and opportunities into an executive-ready briefing.'}
+              </p>
+              {!loading ? (
+                <button onClick={generate} style={{ background: PURPLE, color: '#fff', border: 'none', padding: '14px 36px', borderRadius: 10, fontSize: 15, fontWeight: 600, cursor: 'pointer', boxShadow: '0 4px 12px rgba(103,51,255,0.3)' }}>
+                  Generate CEO Briefing →
+                </button>
+              ) : (
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, color: PURPLE, fontWeight: 600 }}>
+                  <div style={{ width: 20, height: 20, border: `2px solid ${PURPLE}`, borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+                  Processing...
+                </div>
+              )}
+            </div>
+          ) : (
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20, padding: '12px 16px', background: PURPLE_BG, borderRadius: 10 }}>
+                <span style={{ color: PURPLE, fontWeight: 600, fontSize: 14 }}>📅 Briefing for {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                <span style={{ marginLeft: 'auto', color: '#9CA3AF', fontSize: 12 }}>Generated by AI Chief of Staff</span>
+              </div>
+              {BRIEFING_SECTIONS.map((section, si) => (
+                <div key={si} style={{ marginBottom: 16, padding: 22, background: '#fff', borderRadius: 12, border: '1px solid #E5E7EB', opacity: si <= revealing ? 1 : 0, transform: si <= revealing ? 'translateY(0)' : 'translateY(12px)', transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)' }}>
+                  <h3 style={{ fontSize: 15, fontWeight: 700, color: '#111', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span>{section.icon}</span> {section.title}
+                  </h3>
+                  {section.items.map((item, ii) => (
+                    <div key={ii} style={{ fontSize: 14, color: '#374151', lineHeight: 1.7, marginBottom: ii < section.items.length - 1 ? 12 : 0, paddingLeft: 14, borderLeft: `2px solid ${section.borderColor}` }}>
+                      {renderMarkdown(item)}
+                    </div>
+                  ))}
+                </div>
+              ))}
+              {revealing >= BRIEFING_SECTIONS.length && (
+                <div style={{ textAlign: 'center', padding: '16px 0' }}>
+                  <button onClick={() => { setGenerated(false); setRevealing(-1); }} style={{ background: 'transparent', color: PURPLE, border: `1px solid ${PURPLE}`, padding: '10px 24px', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+                    ↻ Regenerate Briefing
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // ─── Chat Tab ────────────────────────────────────────
+    function ChatTab() {
+      const [messages, setMessages] = useState([
+        { role: 'assistant', content: "Good morning. I'm your AI Chief of Staff. I can help you with cross-functional updates, risk assessments, initiative tracking, budget analysis, and stakeholder alignment.\n\nTry asking me:\n• \"What are our biggest compliance risks?\"\n• \"Status of our top 3 initiatives\"\n• \"How's the Q2 budget looking?\"" },
+      ]);
+      const [input, setInput] = useState('');
+      const [typing, setTyping] = useState(false);
+      const bottomRef = useRef(null);
+
+      useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages, typing]);
+
+      function send() {
+        if (!input.trim() || typing) return;
+        const userMsg = input.trim();
+        setInput('');
+        setMessages(prev => [...prev, { role: 'user', content: userMsg }]);
+        setTyping(true);
+        setTimeout(() => {
+          setMessages(prev => [...prev, { role: 'assistant', content: getResponse(userMsg) }]);
+          setTyping(false);
+        }, 1200 + Math.random() * 800);
+      }
+
+      const suggestions = ['What are our biggest compliance risks?', 'Status of our top 3 initiatives', "How's the Q2 budget looking?", "What's happening in the industry?"];
+
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 200px)', minHeight: 500 }}>
+          <div style={{ marginBottom: 16 }}>
+            <h2 style={{ fontSize: 24, fontWeight: 700, color: '#111', margin: 0 }}>Ask the Chief of Staff</h2>
+            <p style={{ color: '#6B7280', fontSize: 14, marginTop: 6 }}>Natural language interface for executive decision support. Ask about any function, initiative, or risk.</p>
+          </div>
+          <div style={{ flex: 1, overflowY: 'auto', padding: '16px 0', display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {messages.map((msg, i) => (
+              <div key={i} style={{ display: 'flex', justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start' }} className="animate-fade-in">
+                <div style={{ maxWidth: '80%', padding: '14px 18px', borderRadius: 14, background: msg.role === 'user' ? PURPLE : '#fff', color: msg.role === 'user' ? '#fff' : '#111', fontSize: 14, lineHeight: 1.65, border: msg.role === 'assistant' ? '1px solid #E5E7EB' : 'none', boxShadow: msg.role === 'assistant' ? '0 1px 3px rgba(0,0,0,0.04)' : 'none' }}>
+                  {msg.role === 'assistant' ? renderMarkdown(msg.content) : msg.content}
+                </div>
+              </div>
+            ))}
+            {typing && (
+              <div style={{ display: 'flex', justifyContent: 'flex-start' }} className="animate-fade-in">
+                <div style={{ padding: '14px 18px', borderRadius: 14, background: '#fff', border: '1px solid #E5E7EB', color: '#9CA3AF', fontSize: 14 }}>
+                  Analyzing cross-functional data...
+                </div>
+              </div>
+            )}
+            <div ref={bottomRef} />
+          </div>
+          {messages.length === 1 && (
+            <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
+              {suggestions.map((s, i) => (
+                <button key={i} onClick={() => setInput(s)} style={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 8, padding: '8px 14px', fontSize: 13, color: '#374151', cursor: 'pointer' }}>
+                  {s}
+                </button>
+              ))}
+            </div>
+          )}
+          <div style={{ display: 'flex', gap: 8, paddingTop: 12, borderTop: '1px solid #E5E7EB' }}>
+            <input value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && send()} placeholder="Ask about compliance, initiatives, budget, risks..." style={{ flex: 1, padding: '14px 18px', borderRadius: 10, border: '1px solid #D1D5DB', fontSize: 14, outline: 'none' }} />
+            <button onClick={send} disabled={typing || !input.trim()} style={{ background: PURPLE, color: '#fff', border: 'none', padding: '0 28px', borderRadius: 10, fontSize: 14, fontWeight: 600, cursor: 'pointer', opacity: typing || !input.trim() ? 0.5 : 1 }}>
+              Send
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    // ─── Chevron Arrow ────────────────────────────────────
+    function Chevron({ open }) {
+      return (
+        <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 24, height: 24, borderRadius: 6, background: open ? PURPLE_BG : '#F3F4F6', color: open ? PURPLE : '#9CA3AF', fontSize: 12, fontWeight: 700, transition: 'all 0.2s', transform: open ? 'rotate(90deg)' : 'rotate(0deg)', flexShrink: 0 }}>
+          ▶
+        </span>
+      );
+    }
+
+    // ─── OKR Tab ─────────────────────────────────────────
+    function OKRTab() {
+      const [okrs, setOkrs] = useState(MOCK_OKRS);
+      const [expanded, setExpanded] = useState(0);
+      const [sortBy, setSortBy] = useState('default');
+      const [showAdd, setShowAdd] = useState(false);
+      const [newOkr, setNewOkr] = useState({ obj: '', owner: '', lead: '', role: '', email: '', progress: 0, status: 'on-track', context: '' });
+
+      const departments = [...new Set(okrs.map(o => o.owner))];
+
+      const sorted = [...okrs].sort((a, b) => {
+        if (sortBy === 'progress-asc') return a.progress - b.progress;
+        if (sortBy === 'progress-desc') return b.progress - a.progress;
+        if (sortBy === 'department') return a.owner.localeCompare(b.owner);
+        if (sortBy === 'status') {
+          const order = { 'behind': 0, 'at-risk': 1, 'on-track': 2 };
+          return order[a.status] - order[b.status];
+        }
+        return 0;
+      });
+
+      function addOkr() {
+        if (!newOkr.obj.trim()) return;
+        setOkrs([...okrs, { ...newOkr, progress: parseInt(newOkr.progress) || 0 }]);
+        setNewOkr({ obj: '', owner: '', lead: '', role: '', email: '', progress: 0, status: 'on-track', context: '' });
+        setShowAdd(false);
+      }
+
+      return (
+        <div>
+          <div style={{ marginBottom: 24 }}>
+            <h2 style={{ fontSize: 24, fontWeight: 700, color: '#111', margin: 0 }}>OKR Tracker</h2>
+            <p style={{ color: '#6B7280', fontSize: 14, marginTop: 6 }}>Real-time company OKR progress with accountable owners, industry context, and AI-powered risk detection. Click any card to expand details.</p>
+          </div>
+          <div style={{ display: 'flex', gap: 16, marginBottom: 28, flexWrap: 'wrap' }}>
+            {[
+              { label: 'On Track', count: okrs.filter(o => o.status === 'on-track').length, color: '#059669' },
+              { label: 'At Risk', count: okrs.filter(o => o.status === 'at-risk').length, color: '#EA580C' },
+              { label: 'Behind', count: okrs.filter(o => o.status === 'behind').length, color: '#DC2626' },
+            ].map((s, i) => (
+              <div key={i} style={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 14, padding: '18px 28px', minWidth: 130, boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+                <div style={{ fontSize: 32, fontWeight: 700, color: s.color }}>{s.count}</div>
+                <div style={{ fontSize: 13, color: '#6B7280', marginTop: 2 }}>{s.label}</div>
+              </div>
+            ))}
+            <div style={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 14, padding: '18px 28px', minWidth: 130, boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+              <div style={{ fontSize: 32, fontWeight: 700, color: PURPLE }}>{okrs.length > 0 ? Math.round(okrs.reduce((a, b) => a + b.progress, 0) / okrs.length) : 0}%</div>
+              <div style={{ fontSize: 13, color: '#6B7280', marginTop: 2 }}>Avg Progress</div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: 8, marginBottom: 16, alignItems: 'center', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: 12, color: '#9CA3AF', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Sort by:</span>
+            {[
+              { value: 'default', label: 'Default' },
+              { value: 'status', label: 'Priority (risk first)' },
+              { value: 'progress-asc', label: 'Progress (low to high)' },
+              { value: 'progress-desc', label: 'Progress (high to low)' },
+              { value: 'department', label: 'Department' },
+            ].map(opt => (
+              <button key={opt.value} onClick={() => setSortBy(opt.value)} style={{ padding: '4px 12px', borderRadius: 6, border: '1px solid ' + (sortBy === opt.value ? PURPLE : '#E5E7EB'), background: sortBy === opt.value ? PURPLE_BG : '#fff', color: sortBy === opt.value ? PURPLE : '#6B7280', fontSize: 12, fontWeight: sortBy === opt.value ? 600 : 400, cursor: 'pointer' }}>
+                {opt.label}
+              </button>
+            ))}
+            <button onClick={() => setShowAdd(!showAdd)} style={{ marginLeft: 'auto', padding: '6px 16px', borderRadius: 8, border: `1px solid ${PURPLE}`, background: showAdd ? PURPLE : 'transparent', color: showAdd ? '#fff' : PURPLE, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+              {showAdd ? 'Cancel' : '+ Add OKR'}
+            </button>
+          </div>
+
+          {showAdd && (
+            <div style={{ background: '#fff', border: `1px solid ${PURPLE}44`, borderRadius: 14, padding: 22, marginBottom: 16, animation: 'fadeIn 0.3s ease' }}>
+              <div style={{ fontSize: 14, fontWeight: 600, color: '#111', marginBottom: 12 }}>Add New OKR</div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 12 }}>
+                <input value={newOkr.obj} onChange={e => setNewOkr({...newOkr, obj: e.target.value})} placeholder="Objective description" style={{ padding: '10px 14px', borderRadius: 8, border: '1px solid #D1D5DB', fontSize: 13, outline: 'none', gridColumn: '1 / -1' }} />
+                <input value={newOkr.owner} onChange={e => setNewOkr({...newOkr, owner: e.target.value})} placeholder="Department" style={{ padding: '10px 14px', borderRadius: 8, border: '1px solid #D1D5DB', fontSize: 13, outline: 'none' }} />
+                <input value={newOkr.lead} onChange={e => setNewOkr({...newOkr, lead: e.target.value})} placeholder="Accountable lead name" style={{ padding: '10px 14px', borderRadius: 8, border: '1px solid #D1D5DB', fontSize: 13, outline: 'none' }} />
+                <input value={newOkr.role} onChange={e => setNewOkr({...newOkr, role: e.target.value})} placeholder="Role / title" style={{ padding: '10px 14px', borderRadius: 8, border: '1px solid #D1D5DB', fontSize: 13, outline: 'none' }} />
+                <input value={newOkr.email} onChange={e => setNewOkr({...newOkr, email: e.target.value})} placeholder="Email" style={{ padding: '10px 14px', borderRadius: 8, border: '1px solid #D1D5DB', fontSize: 13, outline: 'none' }} />
+                <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                  <input type="number" min="0" max="100" value={newOkr.progress} onChange={e => setNewOkr({...newOkr, progress: e.target.value})} placeholder="Progress %" style={{ padding: '10px 14px', borderRadius: 8, border: '1px solid #D1D5DB', fontSize: 13, outline: 'none', width: 100 }} />
+                  <select value={newOkr.status} onChange={e => setNewOkr({...newOkr, status: e.target.value})} style={{ padding: '10px 14px', borderRadius: 8, border: '1px solid #D1D5DB', fontSize: 13, outline: 'none', flex: 1, background: '#fff' }}>
+                    <option value="on-track">On Track</option>
+                    <option value="at-risk">At Risk</option>
+                    <option value="behind">Behind</option>
+                  </select>
+                </div>
+                <input value={newOkr.context} onChange={e => setNewOkr({...newOkr, context: e.target.value})} placeholder="Context / notes (optional)" style={{ padding: '10px 14px', borderRadius: 8, border: '1px solid #D1D5DB', fontSize: 13, outline: 'none', gridColumn: '1 / -1' }} />
+              </div>
+              <button onClick={addOkr} disabled={!newOkr.obj.trim()} style={{ padding: '8px 24px', borderRadius: 8, border: 'none', background: PURPLE, color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer', opacity: newOkr.obj.trim() ? 1 : 0.4 }}>
+                Add OKR
+              </button>
+            </div>
+          )}
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {sorted.map((okr, i) => {
+              const realIndex = okrs.indexOf(okr);
+              const isOpen = expanded === realIndex;
+              return (
+              <div key={realIndex} style={{ background: '#fff', border: isOpen ? `1px solid ${PURPLE}44` : '1px solid #E5E7EB', borderRadius: 14, padding: 22, boxShadow: '0 1px 3px rgba(0,0,0,0.04)', cursor: 'pointer', transition: 'border-color 0.2s' }} onClick={() => setExpanded(isOpen ? null : realIndex)}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1 }}>
+                    <Chevron open={isOpen} />
+                    <div style={{ fontWeight: 600, fontSize: 15, color: '#111' }}>{okr.obj}</div>
+                  </div>
+                  <StatusBadge status={okr.status} />
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: isOpen ? 16 : 0, paddingLeft: 34 }}>
+                  <div style={{ flex: 1 }}><ProgressBar value={okr.progress} /></div>
+                  <span style={{ fontSize: 14, fontWeight: 600, color: '#374151', minWidth: 40, textAlign: 'right' }}>{okr.progress}%</span>
+                  <span style={{ fontSize: 12, color: '#9CA3AF', background: '#F3F4F6', padding: '3px 10px', borderRadius: 6 }}>{okr.owner}</span>
+                </div>
+                {isOpen && (
+                  <div style={{ borderTop: '1px solid #F3F4F6', paddingTop: 16, marginLeft: 34, animation: 'fadeIn 0.3s ease' }}>
+                    <div style={{ display: 'flex', gap: 24, marginBottom: 12, flexWrap: 'wrap' }}>
+                      <div>
+                        <div style={{ fontSize: 11, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 2 }}>Accountable Lead</div>
+                        <div style={{ fontSize: 14, fontWeight: 600, color: '#111' }}>{okr.lead || 'TBD'}</div>
+                        <div style={{ fontSize: 12, color: '#6B7280' }}>{okr.role || ''}</div>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 11, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 2 }}>Contact</div>
+                        <div style={{ fontSize: 13, color: PURPLE, fontWeight: 500 }}>{okr.email || 'N/A'}</div>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 11, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 2 }}>Department</div>
+                        <div style={{ fontSize: 13, color: '#374151', fontWeight: 500 }}>{okr.owner}</div>
+                      </div>
+                    </div>
+                    {okr.context && (
+                      <div style={{ fontSize: 13, color: '#6B7280', lineHeight: 1.6, background: '#F9FAFB', padding: 12, borderRadius: 8 }}>
+                        <strong style={{ color: '#374151' }}>Context:</strong> {okr.context}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+              );
+            })}
+          </div>
+        </div>
+      );
+    }
+
+    // ─── Initiatives Tab ─────────────────────────────────
+    function InitiativesTab() {
+      const [initiatives, setInitiatives] = useState(MOCK_INITIATIVES);
+      const [expanded, setExpanded] = useState(0);
+      const [sortBy, setSortBy] = useState('default');
+      const [showAdd, setShowAdd] = useState(false);
+      const [newInit, setNewInit] = useState({ name: '', priority: 'P1', status: 'Planning', teams: '', dueDate: '', sponsor: '', desc: '', blockers: '' });
+
+      const sorted = [...initiatives].sort((a, b) => {
+        if (sortBy === 'priority') {
+          const order = { P0: 0, P1: 1, P2: 2 };
+          return (order[a.priority] || 9) - (order[b.priority] || 9);
+        }
+        if (sortBy === 'department') return (a.teams[0] || '').localeCompare(b.teams[0] || '');
+        if (sortBy === 'status') {
+          const order = { 'Urgent': 0, 'In Progress': 1, 'Planning': 2, 'Review': 3, 'Scoping': 4 };
+          return (order[a.status] ?? 9) - (order[b.status] ?? 9);
+        }
+        if (sortBy === 'due') return (a.dueDate || '').localeCompare(b.dueDate || '');
+        return 0;
+      });
+
+      function addInit() {
+        if (!newInit.name.trim()) return;
+        setInitiatives([...initiatives, { ...newInit, teams: newInit.teams.split(',').map(t => t.trim()).filter(Boolean) }]);
+        setNewInit({ name: '', priority: 'P1', status: 'Planning', teams: '', dueDate: '', sponsor: '', desc: '', blockers: '' });
+        setShowAdd(false);
+      }
+
+      return (
+        <div>
+          <div style={{ marginBottom: 24 }}>
+            <h2 style={{ fontSize: 24, fontWeight: 700, color: '#111', margin: 0 }}>Initiative Board</h2>
+            <p style={{ color: '#6B7280', fontSize: 14, marginTop: 6 }}>Cross-functional initiative tracking with executive sponsors, blockers, and real industry context. Click any card to expand.</p>
+          </div>
+
+          <div style={{ display: 'flex', gap: 8, marginBottom: 16, alignItems: 'center', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: 12, color: '#9CA3AF', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Sort by:</span>
+            {[
+              { value: 'default', label: 'Default' },
+              { value: 'priority', label: 'Priority' },
+              { value: 'status', label: 'Status' },
+              { value: 'department', label: 'Department' },
+              { value: 'due', label: 'Due Date' },
+            ].map(opt => (
+              <button key={opt.value} onClick={() => setSortBy(opt.value)} style={{ padding: '4px 12px', borderRadius: 6, border: '1px solid ' + (sortBy === opt.value ? PURPLE : '#E5E7EB'), background: sortBy === opt.value ? PURPLE_BG : '#fff', color: sortBy === opt.value ? PURPLE : '#6B7280', fontSize: 12, fontWeight: sortBy === opt.value ? 600 : 400, cursor: 'pointer' }}>
+                {opt.label}
+              </button>
+            ))}
+            <button onClick={() => setShowAdd(!showAdd)} style={{ marginLeft: 'auto', padding: '6px 16px', borderRadius: 8, border: `1px solid ${PURPLE}`, background: showAdd ? PURPLE : 'transparent', color: showAdd ? '#fff' : PURPLE, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+              {showAdd ? 'Cancel' : '+ Add Initiative'}
+            </button>
+          </div>
+
+          {showAdd && (
+            <div style={{ background: '#fff', border: `1px solid ${PURPLE}44`, borderRadius: 14, padding: 22, marginBottom: 16, animation: 'fadeIn 0.3s ease' }}>
+              <div style={{ fontSize: 14, fontWeight: 600, color: '#111', marginBottom: 12 }}>Add New Initiative</div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 12 }}>
+                <input value={newInit.name} onChange={e => setNewInit({...newInit, name: e.target.value})} placeholder="Initiative name" style={{ padding: '10px 14px', borderRadius: 8, border: '1px solid #D1D5DB', fontSize: 13, outline: 'none', gridColumn: '1 / -1' }} />
+                <div style={{ display: 'flex', gap: 10 }}>
+                  <select value={newInit.priority} onChange={e => setNewInit({...newInit, priority: e.target.value})} style={{ padding: '10px 14px', borderRadius: 8, border: '1px solid #D1D5DB', fontSize: 13, outline: 'none', flex: 1, background: '#fff' }}>
+                    <option value="P0">P0 - Critical</option>
+                    <option value="P1">P1 - High</option>
+                    <option value="P2">P2 - Medium</option>
+                  </select>
+                  <select value={newInit.status} onChange={e => setNewInit({...newInit, status: e.target.value})} style={{ padding: '10px 14px', borderRadius: 8, border: '1px solid #D1D5DB', fontSize: 13, outline: 'none', flex: 1, background: '#fff' }}>
+                    <option value="Urgent">Urgent</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Planning">Planning</option>
+                    <option value="Review">Review</option>
+                    <option value="Scoping">Scoping</option>
+                  </select>
+                </div>
+                <input value={newInit.dueDate} onChange={e => setNewInit({...newInit, dueDate: e.target.value})} placeholder="Due date (e.g. Q2 2026)" style={{ padding: '10px 14px', borderRadius: 8, border: '1px solid #D1D5DB', fontSize: 13, outline: 'none' }} />
+                <input value={newInit.teams} onChange={e => setNewInit({...newInit, teams: e.target.value})} placeholder="Teams (comma-separated)" style={{ padding: '10px 14px', borderRadius: 8, border: '1px solid #D1D5DB', fontSize: 13, outline: 'none' }} />
+                <input value={newInit.sponsor} onChange={e => setNewInit({...newInit, sponsor: e.target.value})} placeholder="Executive sponsor" style={{ padding: '10px 14px', borderRadius: 8, border: '1px solid #D1D5DB', fontSize: 13, outline: 'none' }} />
+                <input value={newInit.desc} onChange={e => setNewInit({...newInit, desc: e.target.value})} placeholder="Description" style={{ padding: '10px 14px', borderRadius: 8, border: '1px solid #D1D5DB', fontSize: 13, outline: 'none', gridColumn: '1 / -1' }} />
+                <input value={newInit.blockers} onChange={e => setNewInit({...newInit, blockers: e.target.value})} placeholder="Blockers (or 'None')" style={{ padding: '10px 14px', borderRadius: 8, border: '1px solid #D1D5DB', fontSize: 13, outline: 'none', gridColumn: '1 / -1' }} />
+              </div>
+              <button onClick={addInit} disabled={!newInit.name.trim()} style={{ padding: '8px 24px', borderRadius: 8, border: 'none', background: PURPLE, color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer', opacity: newInit.name.trim() ? 1 : 0.4 }}>
+                Add Initiative
+              </button>
+            </div>
+          )}
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {sorted.map((init, i) => {
+              const realIndex = initiatives.indexOf(init);
+              const isOpen = expanded === realIndex;
+              return (
+              <div key={realIndex} style={{ background: '#fff', border: isOpen ? `1px solid ${PURPLE}44` : '1px solid #E5E7EB', borderRadius: 14, padding: 22, boxShadow: '0 1px 3px rgba(0,0,0,0.04)', cursor: 'pointer', transition: 'border-color 0.2s' }} onClick={() => setExpanded(isOpen ? null : realIndex)}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <Chevron open={isOpen} />
+                    <PriorityBadge priority={init.priority} />
+                    <span style={{ fontWeight: 600, fontSize: 15, color: '#111' }}>{init.name}</span>
+                  </div>
+                  <span style={{ fontSize: 13, color: '#9CA3AF' }}>{init.dueDate}</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: isOpen ? 16 : 0, paddingLeft: 34 }}>
+                  <span style={{ fontSize: 12, color: init.status === 'Urgent' ? '#DC2626' : PURPLE, background: init.status === 'Urgent' ? '#FEF2F2' : PURPLE_BG, padding: '3px 12px', borderRadius: 99, fontWeight: 600 }}>{init.status}</span>
+                  {init.teams.map((team, ti) => (
+                    <span key={ti} style={{ fontSize: 12, color: '#6B7280', background: '#F3F4F6', padding: '3px 10px', borderRadius: 6 }}>{team}</span>
+                  ))}
+                </div>
+                {isOpen && (
+                  <div style={{ borderTop: '1px solid #F3F4F6', paddingTop: 16, marginLeft: 34, animation: 'fadeIn 0.3s ease' }}>
+                    <div style={{ display: 'flex', gap: 24, marginBottom: 14, flexWrap: 'wrap' }}>
+                      <div>
+                        <div style={{ fontSize: 11, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 2 }}>Executive Sponsor</div>
+                        <div style={{ fontSize: 14, fontWeight: 600, color: '#111' }}>{init.sponsor || 'TBD'}</div>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 11, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 2 }}>Blocker</div>
+                        <div style={{ fontSize: 13, color: (init.blockers || '').includes('None') ? '#059669' : '#EA580C', fontWeight: 500 }}>{init.blockers || 'None specified'}</div>
+                      </div>
+                    </div>
+                    {init.desc && (
+                      <div style={{ fontSize: 13, color: '#6B7280', lineHeight: 1.65, background: '#F9FAFB', padding: 12, borderRadius: 8 }}>
+                        {init.desc}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+              );
+            })}
+          </div>
+        </div>
+      );
+    }
+
+    // ─── About Tab ───────────────────────────────────────
+    function AboutTab() {
+      const milestones = [
+        { year: '2013', title: 'Founded DetraPel at age 15', desc: 'Invented PFAS-free liquid repellent technology. Built the company from high school into a real business.' },
+        { year: '2018', title: "ABC's Shark Tank, Season 9", desc: 'Received offers from 4 of 5 Sharks. Closed a deal with Lori Greiner & Mark Cuban. Scaled DetraPel internationally.' },
+        { year: '2019', title: 'Babson College + Scaling Operations', desc: 'Graduated 1 year early with Magna Cum Laude honors while running a growing company. Moved into a 22,000 sq ft facility with 17 employees and in-house chemists.' },
+        { year: '2021', title: 'Forbes 30 Under 30', desc: "Named to the Forbes 30 Under 30 list in Manufacturing & Industry. Also recognized by Worcester Business Journal's 40 Under 40 and BostInno's 25 Under 25." },
+        { year: '2022', title: 'Impermea Materials & Expansion', desc: 'Closed $7.6M Series A from T1 deep tech venture capital firms. Expanded DetraPel into three divisions: Impermea Materials, DetraPel Solutions, and Proof+ to service B2B and B2C clients.' },
+        { year: '2024', title: 'Charlotte Expansion', desc: 'Expanded from Boston to Charlotte, NC with a new 40,000 sq ft facility. Strong year across all three divisions.' },
+        { year: '2025-Now', title: 'AI Strategy & Operations + DetraPel Wind-Down', desc: 'In late 2025, macro shifts in material science venture capital dried up industry funding and our Series B investors backed out. DetraPel is currently winding down. Simultaneously, I pivoted into AI strategy and operations: Strategic Advisor at ERShares, helping build predictive markets through AI-powered investment platforms. Leading business development operations at Tenkara AI, a procurement automation platform for manufacturers, driving go-to-market strategy, operational systems design, and cross-functional execution in a COO-type capacity. Building AI-first operations, automated workflows, and deploying AI across business functions daily.' },
+      ];
+
+      return (
+        <div>
+          <div style={{ marginBottom: 32 }}>
+            <h2 style={{ fontSize: 24, fontWeight: 700, color: '#111', margin: 0 }}>Why I Built This</h2>
+            <p style={{ color: '#6B7280', fontSize: 14, marginTop: 6 }}>Instead of sending a resume, I built the tool I'd use on day one.</p>
+          </div>
+
+          <div style={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 16, padding: 32, marginBottom: 32, boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+            <div style={{ fontSize: 16, lineHeight: 1.75, color: '#374151' }}>
+              <p style={{ marginTop: 0 }}>
+                I'm <strong>David Zamarin</strong>. I started my most recent company at 15, pitched on Shark Tank at 19, made Forbes 30 Under 30, and scaled an advanced materials manufacturing business to a 40,000 sq ft operation with in-house polymer synthesis chemists, automation engineers, and a lights-out operation.
+              </p>
+              <p>
+                After expanding to Charlotte and a strong 2024, the macro environment shifted sharply in late 2025. Material science venture capital hit an all-time low and our Series B investors backed out. DetraPel is currently winding down, and I am looking for my next adventure where I can apply the same hunger and work ethic that made DetraPel an industry leader for sustainable chemical coatings in the textile and packaging industries.
+              </p>
+              <p>
+                More recently, I've gone deep on AI, not just as a user, but as a builder. I've been deploying AI-powered workflows for investment analysis at ERShares, automating operations for manufacturers through Tenkara AI, and building AI tools with Claude, Cursor, and modern dev platforms.
+              </p>
+              <p style={{ marginBottom: 0 }}>
+                When I saw Wrapbook's Chief of Staff role, especially the emphasis on <span style={{ color: PURPLE, fontWeight: 600 }}>deploying AI as a primary operating tool</span> and <span style={{ color: PURPLE, fontWeight: 600 }}>building automated workflows that extend leadership capacity</span>, I didn't want to send a PDF. I wanted to show what "AI-first operations" actually looks like. So I built this.
+              </p>
+            </div>
+          </div>
+
+          <h3 style={{ fontSize: 17, fontWeight: 700, color: '#111', marginBottom: 20 }}>The Journey</h3>
+          <div style={{ position: 'relative', paddingLeft: 28 }}>
+            <div style={{ position: 'absolute', left: 8, top: 6, bottom: 6, width: 2, background: '#E5E7EB' }} />
+            {milestones.map((m, i) => (
+              <div key={i} style={{ marginBottom: 28, position: 'relative' }} className="animate-fade-in">
+                <div style={{ position: 'absolute', left: -24, top: 5, width: 14, height: 14, borderRadius: 99, background: i === milestones.length - 1 ? PURPLE : '#D1D5DB', border: '3px solid #fff', boxShadow: '0 0 0 1px #E5E7EB' }} />
+                <div style={{ fontSize: 12, fontWeight: 700, color: PURPLE, marginBottom: 4 }}>{m.year}</div>
+                <div style={{ fontSize: 16, fontWeight: 600, color: '#111', marginBottom: 4 }}>{m.title}</div>
+                <div style={{ fontSize: 14, color: '#6B7280', lineHeight: 1.65 }}>{m.desc}</div>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ background: PURPLE_BG, borderRadius: 14, padding: 28, marginTop: 32, border: `1px solid ${PURPLE}22` }}>
+            <h3 style={{ fontSize: 16, fontWeight: 700, color: PURPLE, marginTop: 0, marginBottom: 10 }}>Why Wrapbook?</h3>
+            <div style={{ fontSize: 14, color: '#374151', lineHeight: 1.75 }}>
+              <p style={{ marginTop: 0 }}>
+                Wrapbook sits at the intersection of everything I care about: <strong>operational complexity</strong> (production payroll is genuinely hard), <strong>AI transformation</strong> (massive opportunity to automate compliance, reporting, and decision-making), and <strong>a scaling company</strong> that needs someone who's built and operated at high speed before.
+              </p>
+              <p style={{ marginBottom: 0 }}>
+                I've run cross-functional teams, managed P&Ls, and navigated regulatory complexity (PFAS compliance isn't so different from union compliance). I bring strategic thinking, operational rigor, and hands-on AI building experience to every problem I tackle.
+              </p>
+            </div>
+          </div>
+
+          <div style={{ marginTop: 32, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+            <a href="https://www.linkedin.com/in/davidzamarin" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 20px', borderRadius: 10, border: '1px solid #E5E7EB', textDecoration: 'none', color: '#111', fontSize: 14, fontWeight: 500, background: '#fff' }}>
+              LinkedIn →
+            </a>
+            <a href="mailto:david.zamarin@sigma-squared.org" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 20px', borderRadius: 10, border: '1px solid #E5E7EB', textDecoration: 'none', color: '#111', fontSize: 14, fontWeight: 500, background: '#fff' }}>
+              david.zamarin@sigma-squared.org
+            </a>
+            <a href="tel:+12678157390" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 20px', borderRadius: 10, border: '1px solid #E5E7EB', textDecoration: 'none', color: '#111', fontSize: 14, fontWeight: 500, background: '#fff' }}>
+              (267) 815-7390
+            </a>
+          </div>
+        </div>
+      );
+    }
+
+    // ─── Main App ────────────────────────────────────────
+    const TABS = [
+      { id: 'briefing', label: 'Morning Briefing', icon: '🌅' },
+      { id: 'chat', label: 'Ask the CoS', icon: '💬' },
+      { id: 'okrs', label: 'OKR Tracker', icon: '🎯' },
+      { id: 'initiatives', label: 'Initiatives', icon: '📊' },
+      { id: 'about', label: 'About David', icon: '👋' },
+    ];
+
+    function App() {
+      const [activeTab, setActiveTab] = useState('briefing');
+      const [sidebarOpen, setSidebarOpen] = useState(true);
+
+      return (
+        <div style={{ display: 'flex', minHeight: '100vh', background: '#F9FAFB', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif" }}>
+          {/* Sidebar */}
+          <div style={{ width: sidebarOpen ? 260 : 0, overflow: 'hidden', background: '#fff', borderRight: sidebarOpen ? '1px solid #E5E7EB' : 'none', transition: 'width 0.25s cubic-bezier(0.4, 0, 0.2, 1)', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
+            <div style={{ padding: '28px 20px 20px', minWidth: 260 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{ width: 36, height: 36, borderRadius: 10, background: `linear-gradient(135deg, ${PURPLE}, ${PURPLE_LIGHT})`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 17, fontWeight: 700 }}>DZ</div>
+                <div>
+                  <div style={{ fontSize: 15, fontWeight: 700, color: '#111' }}>David Zamarin</div>
+                  <div style={{ fontSize: 11, color: '#9CA3AF', letterSpacing: '0.02em' }}>Chief of Staff OS</div>
+                </div>
+              </div>
+            </div>
+            <div style={{ padding: '0 12px', flex: 1, minWidth: 260 }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: '#9CA3AF', padding: '8px 16px 6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Dashboard</div>
+              {TABS.map(tab => (
+                <NavButton key={tab.id} label={tab.label} icon={tab.icon} active={activeTab === tab.id} onClick={() => setActiveTab(tab.id)} />
+              ))}
+            </div>
+            <div style={{ padding: '20px', borderTop: '1px solid #E5E7EB', minWidth: 260 }}>
+              <div style={{ fontSize: 11, color: '#9CA3AF', lineHeight: 1.6 }}>
+                Built for <span style={{ color: PURPLE, fontWeight: 600 }}>Wrapbook</span><br />Powered by AI · March 2026
+              </div>
+            </div>
+          </div>
+
+          {/* Main Content */}
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+            <div style={{ background: '#fff', borderBottom: '1px solid #E5E7EB', padding: '14px 28px', display: 'flex', alignItems: 'center', gap: 14 }}>
+              <button onClick={() => setSidebarOpen(!sidebarOpen)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 20, color: '#9CA3AF', padding: 4, lineHeight: 1 }}>☰</button>
+              <div style={{ fontSize: 14, color: '#6B7280', fontWeight: 500 }}>
+                {TABS.find(t => t.id === activeTab)?.icon} {TABS.find(t => t.id === activeTab)?.label}
+              </div>
+              <div style={{ marginLeft: 'auto', fontSize: 12, color: '#C4C4C4', fontStyle: 'italic' }}>
+                Live demo - imagine this connected to your real company data
+              </div>
+            </div>
+            <div style={{ flex: 1, padding: '32px', overflowY: 'auto' }}>
+              <div style={{ maxWidth: 860, margin: '0 auto' }}>
+                {activeTab === 'briefing' && <BriefingTab />}
+                {activeTab === 'chat' && <ChatTab />}
+                {activeTab === 'okrs' && <OKRTab />}
+                {activeTab === 'initiatives' && <InitiativesTab />}
+                {activeTab === 'about' && <AboutTab />}
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
