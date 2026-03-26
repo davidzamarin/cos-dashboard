@@ -158,6 +158,25 @@
       const [generated, setGenerated] = useState(false);
       const [revealing, setRevealing] = useState(-1);
       const [loading, setLoading] = useState(false);
+      const [liveBriefing, setLiveBriefing] = useState(null);
+      const [liveLoading, setLiveLoading] = useState(false);
+
+      async function refreshWithAI() {
+        setLiveLoading(true);
+        try {
+          const resp = await fetch('/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ messages: [{ role: 'user', content: 'Generate a comprehensive CEO morning briefing for today. Cover: critical items needing attention (SAG-AFTRA deadlines, industry headwinds), cross-functional updates from each department (product, engineering, sales, marketing, compliance), key opportunities to highlight, and this week\'s leadership priorities with specific actions and owners. Format with clear section headers using **bold**. Be specific with data points, names, and deadlines.' }] }),
+          });
+          if (!resp.ok) throw new Error('API error');
+          const data = await resp.json();
+          setLiveBriefing(data.content);
+        } catch (e) {
+          setLiveBriefing('Unable to generate live briefing. Showing curated briefing above.');
+        }
+        setLiveLoading(false);
+      }
 
       function generate() {
         setLoading(true);
@@ -205,9 +224,12 @@
               </div>
               {BRIEFING_SECTIONS.map((section, si) => (
                 <div key={si} style={{ marginBottom: 16, padding: 22, background: '#fff', borderRadius: 12, border: '1px solid #E5E7EB', opacity: si <= revealing ? 1 : 0, transform: si <= revealing ? 'translateY(0)' : 'translateY(12px)', transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)' }}>
-                  <h3 style={{ fontSize: 15, fontWeight: 700, color: '#111', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span>{section.icon}</span> {section.title}
-                  </h3>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+                    <h3 style={{ fontSize: 15, fontWeight: 700, color: '#111', display: 'flex', alignItems: 'center', gap: 8, margin: 0 }}>
+                      <span>{section.icon}</span> {section.title}
+                    </h3>
+                    <span style={{ fontSize: 10, color: '#9CA3AF', background: '#F3F4F6', padding: '2px 8px', borderRadius: 4, fontWeight: 500 }}>AI-generated from public data</span>
+                  </div>
                   {section.items.map((item, ii) => (
                     <div key={ii} style={{ fontSize: 14, color: '#374151', lineHeight: 1.7, marginBottom: ii < section.items.length - 1 ? 12 : 0, paddingLeft: 14, borderLeft: `2px solid ${section.borderColor}` }}>
                       {renderMarkdown(item)}
@@ -216,10 +238,36 @@
                 </div>
               ))}
               {revealing >= BRIEFING_SECTIONS.length && (
-                <div style={{ textAlign: 'center', padding: '16px 0' }}>
-                  <button onClick={() => { setGenerated(false); setRevealing(-1); }} style={{ background: 'transparent', color: PURPLE, border: `1px solid ${PURPLE}`, padding: '10px 24px', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
-                    ↻ Regenerate Briefing
-                  </button>
+                <div>
+                  <div style={{ background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: 10, padding: 16, marginBottom: 16 }}>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: '#6B7280', marginBottom: 6 }}>Data Sources</div>
+                    <div style={{ fontSize: 12, color: '#9CA3AF', lineHeight: 1.6 }}>
+                      This briefing is generated from publicly available data: Wrapbook's 2026 State of Production Finance report, product launch announcements, SAG-AFTRA contract details, SEC filings, and entertainment industry research. In production, this would pull from internal systems - project management tools (OKR status), Slack (cross-functional updates), CRM (pipeline data), HRIS (team data), and news APIs (industry context).
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: 12, justifyContent: 'center', padding: '16px 0' }}>
+                    <button onClick={() => { setGenerated(false); setRevealing(-1); setLiveBriefing(null); }} style={{ background: 'transparent', color: PURPLE, border: `1px solid ${PURPLE}`, padding: '10px 24px', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+                      ↻ Regenerate Briefing
+                    </button>
+                    <button onClick={refreshWithAI} disabled={liveLoading} style={{ background: PURPLE, color: '#fff', border: 'none', padding: '10px 24px', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer', opacity: liveLoading ? 0.6 : 1, display: 'flex', alignItems: 'center', gap: 8 }}>
+                      {liveLoading ? (
+                        <><div style={{ width: 14, height: 14, border: '2px solid #fff', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} /> Generating live briefing...</>
+                      ) : '🔄 Refresh with Live AI'}
+                    </button>
+                  </div>
+                  {liveBriefing && (
+                    <div style={{ marginTop: 16, padding: 22, background: '#fff', borderRadius: 12, border: `1px solid ${PURPLE}44`, animation: 'fadeIn 0.4s ease' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+                        <h3 style={{ fontSize: 15, fontWeight: 700, color: PURPLE, margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
+                          🤖 Live AI Briefing
+                        </h3>
+                        <span style={{ fontSize: 10, color: PURPLE, background: PURPLE_BG, padding: '2px 8px', borderRadius: 4, fontWeight: 500 }}>Generated live via Claude API</span>
+                      </div>
+                      <div style={{ fontSize: 14, color: '#374151', lineHeight: 1.7 }}>
+                        {renderMarkdown(liveBriefing)}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
