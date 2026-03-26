@@ -645,7 +645,22 @@
     function MeetingsTab({ onNavigate }) {
       const [questionIndex, setQuestionIndex] = useState(0);
       const [showNotes, setShowNotes] = useState(false);
-      
+      const [activeTopic, setActiveTopic] = useState(0);
+      const [showAddTopic, setShowAddTopic] = useState(false);
+      const [newTopic, setNewTopic] = useState({ decision: '', owner: '', deadline: '', context: '', optionA: '', optionB: '', optionC: '', recommendation: '' });
+      const [topics, setTopics] = useState([
+        { decision: 'Should we ship Cinapse integration alongside Core AP Automation in Q2, or decouple them and extend Cinapse into Q3?', owner: 'Naysawn Naji (CIO)', deadline: 'Decision by March 28, 2026', context: 'Cinapse was acquired Dec 2025 to strengthen production accounting. 64% of finance leaders cite disconnected systems as their #1 barrier to cash flow prediction. Engineering is shipping 2-5x faster with AI tooling, but product capacity is a bottleneck at 80% vs. 130% demand.', optionA: 'Ship both in Q2. Risk: data migration may not be complete, product team stretched thin.', optionB: 'Ship AP Automation in Q2, extend Cinapse to Q3. Derisks delivery. Lets product team focus.', optionC: 'Delay both to Q3. Safest, but loses first-mover advantage on AP automation and momentum from Paramount/Unrealistic Ideas results.', recommendation: 'Option B. AP Automation has proven customer traction (Paramount, Unrealistic Ideas) and should not wait on Cinapse data migration. Decoupling lets Dan\'s engineering team maintain velocity on AP while product scopes the Cinapse integration properly. Jeff\'s sales pipeline at 2.3x needs AP automation as a closer - delaying it risks deals.', recommended: 'B' },
+        { decision: 'Should we divert 2 engineering hires to the product team to address the capacity bottleneck?', owner: 'William West (VP People)', deadline: 'Decision by April 4, 2026', context: 'Product team is at 80% capacity vs. 130% demand. Engineering is outpacing product 2-5x with AI gains. Three product specs are queued with no owner.', optionA: 'Divert 2 planned engineering hires to product. Risk: slows engineering velocity.', optionB: 'Hire 2 net-new product roles. Takes 60-90 days but preserves engineering momentum.', optionC: 'Contract product consultants for 3 months to bridge the gap while hiring.', recommendation: 'Option C for immediate relief, with Option B in parallel. Contractors bridge the gap in 2 weeks vs. 60-90 days for full hires. Do not slow engineering - their AI velocity is our competitive advantage.', recommended: 'C' },
+      ]);
+
+      function addTopic() {
+        if (!newTopic.decision.trim()) return;
+        setTopics([...topics, { ...newTopic, recommended: 'B' }]);
+        setNewTopic({ decision: '', owner: '', deadline: '', context: '', optionA: '', optionB: '', optionC: '', recommendation: '' });
+        setShowAddTopic(false);
+        setActiveTopic(topics.length);
+      }
+
       const questions = [
         "What's one thing your team shipped this week you're proud of?",
         "What's one thing that surprised you this week?",
@@ -697,42 +712,75 @@
                 <div style={{ fontSize: 12, background: PURPLE_BG, color: PURPLE, padding: '4px 10px', borderRadius: 6, fontWeight: 600 }}>10 min</div>
               </div>
               <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 12 }}>Replaces the 6-page Amazon-style doc. One page, one decision, structured for fast alignment. The presenter fills this out before the meeting - the team reads it in the first 10 minutes, then discusses.</div>
+
+              <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap', alignItems: 'center' }}>
+                {topics.map((t, i) => (
+                  <button key={i} onClick={() => setActiveTopic(i)} style={{ padding: '6px 14px', borderRadius: 8, border: `1px solid ${activeTopic === i ? PURPLE : '#E5E7EB'}`, background: activeTopic === i ? PURPLE_BG : '#fff', color: activeTopic === i ? PURPLE : '#6B7280', fontSize: 12, fontWeight: activeTopic === i ? 600 : 400, cursor: 'pointer' }}>
+                    Topic {i + 1}
+                  </button>
+                ))}
+                <button onClick={() => setShowAddTopic(!showAddTopic)} style={{ padding: '6px 14px', borderRadius: 8, border: `1px solid ${PURPLE}`, background: showAddTopic ? PURPLE : 'transparent', color: showAddTopic ? '#fff' : PURPLE, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
+                  {showAddTopic ? 'Cancel' : '+ Add Topic'}
+                </button>
+              </div>
+
+              {showAddTopic && (
+                <div style={{ background: '#fff', border: `1px solid ${PURPLE}44`, borderRadius: 10, padding: 16, marginBottom: 12, animation: 'fadeIn 0.3s ease' }}>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: '#111', marginBottom: 10 }}>New Decision Brief</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 10 }}>
+                    <input value={newTopic.decision} onChange={e => setNewTopic({...newTopic, decision: e.target.value})} placeholder="Decision needed" style={{ padding: '8px 12px', borderRadius: 6, border: '1px solid #D1D5DB', fontSize: 12, outline: 'none', gridColumn: '1 / -1' }} />
+                    <input value={newTopic.owner} onChange={e => setNewTopic({...newTopic, owner: e.target.value})} placeholder="Owner" style={{ padding: '8px 12px', borderRadius: 6, border: '1px solid #D1D5DB', fontSize: 12, outline: 'none' }} />
+                    <input value={newTopic.deadline} onChange={e => setNewTopic({...newTopic, deadline: e.target.value})} placeholder="Decision deadline" style={{ padding: '8px 12px', borderRadius: 6, border: '1px solid #D1D5DB', fontSize: 12, outline: 'none' }} />
+                    <input value={newTopic.context} onChange={e => setNewTopic({...newTopic, context: e.target.value})} placeholder="Context (3 sentences max)" style={{ padding: '8px 12px', borderRadius: 6, border: '1px solid #D1D5DB', fontSize: 12, outline: 'none', gridColumn: '1 / -1' }} />
+                    <input value={newTopic.optionA} onChange={e => setNewTopic({...newTopic, optionA: e.target.value})} placeholder="Option A" style={{ padding: '8px 12px', borderRadius: 6, border: '1px solid #D1D5DB', fontSize: 12, outline: 'none', gridColumn: '1 / -1' }} />
+                    <input value={newTopic.optionB} onChange={e => setNewTopic({...newTopic, optionB: e.target.value})} placeholder="Option B" style={{ padding: '8px 12px', borderRadius: 6, border: '1px solid #D1D5DB', fontSize: 12, outline: 'none', gridColumn: '1 / -1' }} />
+                    <input value={newTopic.optionC} onChange={e => setNewTopic({...newTopic, optionC: e.target.value})} placeholder="Option C (optional)" style={{ padding: '8px 12px', borderRadius: 6, border: '1px solid #D1D5DB', fontSize: 12, outline: 'none', gridColumn: '1 / -1' }} />
+                    <input value={newTopic.recommendation} onChange={e => setNewTopic({...newTopic, recommendation: e.target.value})} placeholder="Recommendation & rationale" style={{ padding: '8px 12px', borderRadius: 6, border: '1px solid #D1D5DB', fontSize: 12, outline: 'none', gridColumn: '1 / -1' }} />
+                  </div>
+                  <button onClick={addTopic} disabled={!newTopic.decision.trim()} style={{ padding: '6px 18px', borderRadius: 6, border: 'none', background: PURPLE, color: '#fff', fontSize: 12, fontWeight: 600, cursor: 'pointer', opacity: newTopic.decision.trim() ? 1 : 0.4 }}>
+                    Add Decision Brief
+                  </button>
+                </div>
+              )}
+
+              {topics[activeTopic] && (
               <div style={{ background: '#fff', border: `1px solid ${PURPLE}44`, borderRadius: 10, padding: 20 }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
                   <div style={{ fontSize: 14, fontWeight: 700, color: PURPLE }}>1-Page Decision Brief</div>
-                  <span style={{ fontSize: 10, color: '#9CA3AF', background: '#F3F4F6', padding: '2px 8px', borderRadius: 4 }}>Example - Cinapse Integration</span>
+                  <span style={{ fontSize: 10, color: '#9CA3AF', background: '#F3F4F6', padding: '2px 8px', borderRadius: 4 }}>Topic {activeTopic + 1} of {topics.length}</span>
                 </div>
                 <div style={{ marginBottom: 14, paddingBottom: 14, borderBottom: '1px solid #F3F4F6' }}>
                   <div style={{ fontSize: 11, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Decision Needed</div>
-                  <div style={{ fontSize: 14, fontWeight: 600, color: '#111' }}>Should we ship Cinapse integration alongside Core AP Automation in Q2, or decouple them and extend Cinapse into Q3?</div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: '#111' }}>{topics[activeTopic].decision}</div>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14, paddingBottom: 14, borderBottom: '1px solid #F3F4F6' }}>
                   <div>
                     <div style={{ fontSize: 11, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Owner</div>
-                    <div style={{ fontSize: 13, color: '#111' }}>Naysawn Naji (CIO)</div>
+                    <div style={{ fontSize: 13, color: '#111' }}>{topics[activeTopic].owner}</div>
                   </div>
                   <div>
                     <div style={{ fontSize: 11, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Deadline</div>
-                    <div style={{ fontSize: 13, color: '#111' }}>Decision by March 28, 2026</div>
+                    <div style={{ fontSize: 13, color: '#111' }}>{topics[activeTopic].deadline}</div>
                   </div>
                 </div>
                 <div style={{ marginBottom: 14, paddingBottom: 14, borderBottom: '1px solid #F3F4F6' }}>
                   <div style={{ fontSize: 11, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Context (3 sentences max)</div>
-                  <div style={{ fontSize: 13, color: '#374151', lineHeight: 1.6 }}>Cinapse was acquired Dec 2025 to strengthen production accounting. 64% of finance leaders cite disconnected systems as their #1 barrier to cash flow prediction. Engineering is shipping 2-5x faster with AI tooling, but product capacity is a bottleneck at 80% vs. 130% demand.</div>
+                  <div style={{ fontSize: 13, color: '#374151', lineHeight: 1.6 }}>{topics[activeTopic].context}</div>
                 </div>
                 <div style={{ marginBottom: 14, paddingBottom: 14, borderBottom: '1px solid #F3F4F6' }}>
                   <div style={{ fontSize: 11, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Options (max 3)</div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                    <div style={{ fontSize: 13, color: '#374151', padding: '8px 12px', background: '#F9FAFB', borderRadius: 6 }}><strong>A.</strong> Ship both in Q2. Risk: data migration may not be complete, product team stretched thin.</div>
-                    <div style={{ fontSize: 13, color: '#374151', padding: '8px 12px', background: PURPLE_BG, borderRadius: 6, border: `1px solid ${PURPLE}22` }}><strong>B.</strong> Ship AP Automation in Q2, extend Cinapse to Q3. Derisks delivery. Lets product team focus. <span style={{ color: PURPLE, fontWeight: 600 }}>(Recommended)</span></div>
-                    <div style={{ fontSize: 13, color: '#374151', padding: '8px 12px', background: '#F9FAFB', borderRadius: 6 }}><strong>C.</strong> Delay both to Q3. Safest, but loses first-mover advantage on AP automation and momentum from Paramount/Unrealistic Ideas results.</div>
+                    {topics[activeTopic].optionA && <div style={{ fontSize: 13, color: '#374151', padding: '8px 12px', background: topics[activeTopic].recommended === 'A' ? PURPLE_BG : '#F9FAFB', borderRadius: 6, border: topics[activeTopic].recommended === 'A' ? `1px solid ${PURPLE}22` : 'none' }}><strong>A.</strong> {topics[activeTopic].optionA} {topics[activeTopic].recommended === 'A' && <span style={{ color: PURPLE, fontWeight: 600 }}>(Recommended)</span>}</div>}
+                    {topics[activeTopic].optionB && <div style={{ fontSize: 13, color: '#374151', padding: '8px 12px', background: topics[activeTopic].recommended === 'B' ? PURPLE_BG : '#F9FAFB', borderRadius: 6, border: topics[activeTopic].recommended === 'B' ? `1px solid ${PURPLE}22` : 'none' }}><strong>B.</strong> {topics[activeTopic].optionB} {topics[activeTopic].recommended === 'B' && <span style={{ color: PURPLE, fontWeight: 600 }}>(Recommended)</span>}</div>}
+                    {topics[activeTopic].optionC && <div style={{ fontSize: 13, color: '#374151', padding: '8px 12px', background: topics[activeTopic].recommended === 'C' ? PURPLE_BG : '#F9FAFB', borderRadius: 6, border: topics[activeTopic].recommended === 'C' ? `1px solid ${PURPLE}22` : 'none' }}><strong>C.</strong> {topics[activeTopic].optionC} {topics[activeTopic].recommended === 'C' && <span style={{ color: PURPLE, fontWeight: 600 }}>(Recommended)</span>}</div>}
                   </div>
                 </div>
                 <div>
                   <div style={{ fontSize: 11, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Recommendation & Rationale</div>
-                  <div style={{ fontSize: 13, color: '#374151', lineHeight: 1.6 }}>Option B. AP Automation has proven customer traction (Paramount, Unrealistic Ideas) and should not wait on Cinapse data migration. Decoupling lets Dan's engineering team maintain velocity on AP while product scopes the Cinapse integration properly. Jeff's sales pipeline at 2.3x needs AP automation as a closer - delaying it risks deals.</div>
+                  <div style={{ fontSize: 13, color: '#374151', lineHeight: 1.6 }}>{topics[activeTopic].recommendation}</div>
                 </div>
               </div>
+              )}
             </div>
 
             {/* 15-45 min block */}
