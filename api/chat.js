@@ -34,8 +34,8 @@ Leadership Team:
 - Ali Javid - CEO. Holds strong opinions, seeks consensus. Thoughtful, intellectual, moves fast.
 - Naysawn Naji - Co-Founder & CIO. Leads engineering and product technology.
 - William West - VP People. Former Tableau. Focused on leadership team dynamics and culture.
-- Christina - CFO. Oversees finance and budget.
-- Dan - VP Engineering. Engineering team achieving 30-50% efficiency gains from AI.
+- Kristina Campbell - CFO. Oversees finance and budget.
+- Daniel Leventhal - VP Engineering. Engineering team achieving 30-50% efficiency gains from AI.
 - Jeff Caruso - SVP Studio Sales & Success. Pipeline at 2.3x target.
 - Cameron Woodward - CMO. Led 2026 State of Production Finance report.
 

@@ -667,7 +667,7 @@
       const [showAddTopic, setShowAddTopic] = useState(false);
       const [newTopic, setNewTopic] = useState({ decision: '', owner: '', deadline: '', context: '', optionA: '', optionB: '', optionC: '', recommendation: '' });
       const [topics, setTopics] = useState([
-        { decision: 'Should we ship Cinapse integration alongside Core AP Automation in Q2, or decouple them and extend Cinapse into Q3?', owner: 'Naysawn Naji (CIO)', deadline: 'Decision by March 28, 2026', context: 'Cinapse was acquired Dec 2025 to strengthen production accounting. 64% of finance leaders cite disconnected systems as their #1 barrier to cash flow prediction. Engineering is shipping 2-5x faster with AI tooling, but product capacity is a bottleneck at 80% vs. 130% demand.', optionA: 'Ship both in Q2. Risk: data migration may not be complete, product team stretched thin.', optionB: 'Ship AP Automation in Q2, extend Cinapse to Q3. Derisks delivery. Lets product team focus.', optionC: 'Delay both to Q3. Safest, but loses first-mover advantage on AP automation and momentum from Paramount/Unrealistic Ideas results.', recommendation: 'Option B. AP Automation has proven customer traction (Paramount, Unrealistic Ideas) and should not wait on Cinapse data migration. Decoupling lets Dan\'s engineering team maintain velocity on AP while product scopes the Cinapse integration properly. Jeff\'s sales pipeline at 2.3x needs AP automation as a closer - delaying it risks deals.', recommended: 'B' },
+        { decision: 'Should we ship Cinapse integration alongside Core AP Automation in Q2, or decouple them and extend Cinapse into Q3?', owner: 'Naysawn Naji (CIO)', deadline: 'Decision by March 28, 2026', context: 'Cinapse was acquired Dec 2025 to strengthen production accounting. 64% of finance leaders cite disconnected systems as their #1 barrier to cash flow prediction. Engineering is shipping 2-5x faster with AI tooling, but product capacity is a bottleneck at 80% vs. 130% demand.', optionA: 'Ship both in Q2. Risk: data migration may not be complete, product team stretched thin.', optionB: 'Ship AP Automation in Q2, extend Cinapse to Q3. Derisks delivery. Lets product team focus.', optionC: 'Delay both to Q3. Safest, but loses first-mover advantage on AP automation and momentum from Paramount/Unrealistic Ideas results.', recommendation: 'Option B. AP Automation has proven customer traction (Paramount, Unrealistic Ideas) and should not wait on Cinapse data migration. Decoupling lets Daniel Leventhal\'s engineering team maintain velocity on AP while product scopes the Cinapse integration properly. Jeff\'s sales pipeline at 2.3x needs AP automation as a closer - delaying it risks deals.', recommended: 'B' },
         { decision: 'Should we divert 2 engineering hires to the product team to address the capacity bottleneck?', owner: 'William West (VP People)', deadline: 'Decision by April 4, 2026', context: 'Product team is at 80% capacity vs. 130% demand. Engineering is outpacing product 2-5x with AI gains. Three product specs are queued with no owner.', optionA: 'Divert 2 planned engineering hires to product. Risk: slows engineering velocity.', optionB: 'Hire 2 net-new product roles. Takes 60-90 days but preserves engineering momentum.', optionC: 'Contract product consultants for 3 months to bridge the gap while hiring.', recommendation: 'Option C for immediate relief, with Option B in parallel. Contractors bridge the gap in 2 weeks vs. 60-90 days for full hires. Do not slow engineering - their AI velocity is our competitive advantage.', recommended: 'C' },
       ]);
 
@@ -691,8 +691,8 @@
         { name: 'Ali Javid', title: 'CEO', function: 'Strategy & Culture', prompt: 'What customer or market signal should reshape our Q2 focus?' },
         { name: 'Naysawn Naji', title: 'Co-Founder & CIO', function: 'Engineering & Infrastructure', prompt: 'Engineering is shipping 2-5x faster with AI. What downstream capacity gaps should we plan for in Product and CS?' },
         { name: 'William West', title: 'VP People', function: 'Culture & Talent', prompt: 'What organizational friction are you seeing that no one else is surfacing?' },
-        { name: 'Christina', title: 'CFO', function: 'Finance & Operations', prompt: 'Given industry production volume headwinds, what financial assumptions should we stress-test?' },
-        { name: 'Dan', title: 'VP Engineering', function: 'Product & Engineering', prompt: 'What technical or capacity constraint are you worried about 90 days from now?' },
+        { name: 'Kristina Campbell', title: 'CFO', function: 'Finance & Operations', prompt: 'Given industry production volume headwinds, what financial assumptions should we stress-test?' },
+        { name: 'Daniel Leventhal', title: 'VP Engineering', function: 'Product & Engineering', prompt: 'What technical or capacity constraint are you worried about 90 days from now?' },
         { name: 'Jeff Caruso', title: 'SVP Sales', function: 'Sales & Enterprise', prompt: 'What are your top 3 customer blockers to deal closure in the next 30 days?' },
         { name: 'Cameron Woodward', title: 'CMO', function: 'Marketing & Brand', prompt: 'What competitive or market positioning insight should shape our product roadmap?' },
       ];
@@ -858,7 +858,7 @@
                 - Ship core AP automation Q2, extend Cinapse integration to Q3<br />
                 - Prioritize SAG-AFTRA 2026 contract integration for Rate Finder<br /><br />
                 <strong>Action Items:</strong><br />
-                - Engineering: Allocate sprint capacity for Rate Finder update (Dan, by Apr 1)<br />
+                - Engineering: Allocate sprint capacity for Rate Finder update (Daniel Leventhal, by Apr 1)<br />
                 - Sales: Brief on feature velocity & timeline impact (Jeff, by EOW)<br />
                 - People: Scope product team augmentation plan (William, by next meeting)
               </div>
@@ -876,13 +876,13 @@
         'Ali Javid': 'Support',
         'Naysawn Naji': 'Strongly Support',
         'William West': 'Can Live With It',
-        'Christina': 'Support',
-        'Dan': 'Have Concerns',
+        'Kristina Campbell': 'Support',
+        'Daniel Leventhal': 'Have Concerns',
         'Jeff Caruso': 'Cannot Support',
         'Cameron Woodward': 'Support',
       });
       const [concerns, setConcerns] = useState({
-        'Dan': 'Rate Finder V2 is in customer contracts. Pushing timeline may damage relationships.',
+        'Daniel Leventhal': 'Rate Finder V2 is in customer contracts. Pushing timeline may damage relationships.',
         'Jeff Caruso': 'Sales pipeline includes 3 deals dependent on Rate Finder V2. Delaying puts $1.5M+ ACV at risk.'
       });
       const [promptIndex, setPromptIndex] = useState(0);
@@ -895,7 +895,7 @@
       const [decisionRecorded, setDecisionRecorded] = useState(false);
 
       const facilitations = [
-        'Dan + Jeff: What if we ship Rate Finder V2 core features in Q2 (30 days) with Cinapse integration in Q3? De-risks both.',
+        'Daniel + Jeff: What if we ship Rate Finder V2 core features in Q2 (30 days) with Cinapse integration in Q3? De-risks both.',
         'Naysawn + Jeff: What would "Rate Finder V2 lite" look like - 80% of value in 2 weeks vs. 6 weeks?',
         'Ali: Is this a resourcing problem or a prioritization problem? Can we solve it by bringing in contractors or reallocating product team?'
       ];
@@ -1073,7 +1073,7 @@
 
       const [actions, setActions] = useState([
         'Organize a product feature roundtable for the sales team to ensure pipeline conversations reflect upcoming capabilities',
-        'Coordinate with Dan (Engineering) on pacing feature releases to match product capacity',
+        'Coordinate with Daniel Leventhal (Engineering) on pacing feature releases to match product capacity',
         'Brief Jeff (Sales) on upcoming feature velocity so pipeline conversations set accurate timelines',
         'Work with William (People) on temporary product team augmentation plan',
       ]);
