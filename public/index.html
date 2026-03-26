@@ -154,28 +154,39 @@
     }
 
     // ─── Briefing Tab ────────────────────────────────────
+    const AI_SECTION_PROMPTS = [
+      'You are a Chief of Staff AI. Looking at these critical items for the Wrapbook CEO today - SAG-AFTRA 2026 contract expiring March 31 and industry production volume at pandemic lows - generate ONE fresh strategic insight the CEO should act on THIS WEEK that is NOT already covered by these items. Think about second-order effects, stakeholder moves, or timing opportunities. Be specific with names, dates, and recommended actions. 2-3 sentences max. Do not repeat information about SAG-AFTRA deadlines or production volume drops - those are already covered.',
+      'You are a Chief of Staff AI at Wrapbook (entertainment payroll/finance platform). The CEO already has standard department updates. Generate ONE cross-functional FRICTION POINT or hidden dependency between teams that a Chief of Staff would flag - something that is not obvious from individual department reports but emerges when you look across functions. For context: Engineering is shipping 2-5x faster with AI, Product is at 130% demand (bottleneck), Sales pipeline is 2.3x target, Cinapse integration is in progress, and the SAG-AFTRA contract transition is urgent. Be specific and actionable. 2-3 sentences max.',
+      'You are a Chief of Staff AI at Wrapbook. The CEO already knows about California tax incentives, AI compliance as a differentiator, and creator economy expansion. Generate ONE new strategic opportunity the leadership team is likely NOT discussing yet - think about competitive timing windows, partnership plays, talent acquisition opportunities, or market positioning moves given current industry dynamics. Be bold and specific. 2-3 sentences max.',
+      'You are a Chief of Staff AI at Wrapbook. The CEO already has a basic weekly schedule. Generate 1-2 SPECIFIC leadership moves for this week that go beyond routine meetings - think about relationship-building calls, preemptive stakeholder alignment, board member prep, culture signals, or strategic conversations that should happen before they become urgent. Include who, what, and why. 2-3 sentences max.',
+    ];
+
     function BriefingTab() {
       const [generated, setGenerated] = useState(false);
       const [revealing, setRevealing] = useState(-1);
       const [loading, setLoading] = useState(false);
-      const [liveBriefing, setLiveBriefing] = useState(null);
-      const [liveLoading, setLiveLoading] = useState(false);
+      const [aiInsights, setAiInsights] = useState({});
+      const [aiLoading, setAiLoading] = useState({});
 
-      async function refreshWithAI() {
-        setLiveLoading(true);
+      async function fetchSectionInsight(sectionIndex) {
+        setAiLoading(prev => ({ ...prev, [sectionIndex]: true }));
         try {
           const resp = await fetch('/api/chat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ messages: [{ role: 'user', content: 'Generate a comprehensive CEO morning briefing for today. Cover: critical items needing attention (SAG-AFTRA deadlines, industry headwinds), cross-functional updates from each department (product, engineering, sales, marketing, compliance), key opportunities to highlight, and this week\'s leadership priorities with specific actions and owners. Format with clear section headers using **bold**. Be specific with data points, names, and deadlines.' }] }),
+            body: JSON.stringify({ messages: [{ role: 'user', content: AI_SECTION_PROMPTS[sectionIndex] }] }),
           });
           if (!resp.ok) throw new Error('API error');
           const data = await resp.json();
-          setLiveBriefing(data.content);
+          setAiInsights(prev => ({ ...prev, [sectionIndex]: data.content }));
         } catch (e) {
-          setLiveBriefing('Unable to generate live briefing. Showing curated briefing above.');
+          setAiInsights(prev => ({ ...prev, [sectionIndex]: 'Unable to generate AI insight for this section. Try again later.' }));
         }
-        setLiveLoading(false);
+        setAiLoading(prev => ({ ...prev, [sectionIndex]: false }));
+      }
+
+      function refreshAllWithAI() {
+        BRIEFING_SECTIONS.forEach((_, i) => fetchSectionInsight(i));
       }
 
       function generate() {
@@ -189,6 +200,8 @@
           return () => clearTimeout(timer);
         }
       }, [revealing]);
+
+      const anyLoading = Object.values(aiLoading).some(v => v);
 
       return (
         <div>
@@ -235,6 +248,24 @@
                       {renderMarkdown(item)}
                     </div>
                   ))}
+                  {aiLoading[si] && (
+                    <div style={{ marginTop: 14, padding: '12px 16px', background: PURPLE_BG, borderRadius: 8, display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <div style={{ width: 14, height: 14, border: `2px solid ${PURPLE}`, borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite', flexShrink: 0 }} />
+                      <span style={{ fontSize: 13, color: PURPLE, fontWeight: 500 }}>Generating AI insight...</span>
+                    </div>
+                  )}
+                  {aiInsights[si] && !aiLoading[si] && (
+                    <div style={{ marginTop: 14, padding: '14px 16px', background: `linear-gradient(135deg, ${PURPLE_BG}, rgba(103, 51, 255, 0.03))`, borderRadius: 8, borderLeft: `3px solid ${PURPLE}`, animation: 'fadeIn 0.4s ease' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+                        <span style={{ fontSize: 12 }}>🤖</span>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: PURPLE, textTransform: 'uppercase', letterSpacing: '0.5px' }}>CoS AI Insight</span>
+                        <span style={{ fontSize: 10, color: '#9CA3AF', marginLeft: 'auto' }}>Live via Claude API</span>
+                      </div>
+                      <div style={{ fontSize: 13, color: '#374151', lineHeight: 1.7 }}>
+                        {renderMarkdown(aiInsights[si])}
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
               {revealing >= BRIEFING_SECTIONS.length && (
@@ -246,28 +277,15 @@
                     </div>
                   </div>
                   <div style={{ display: 'flex', gap: 12, justifyContent: 'center', padding: '16px 0' }}>
-                    <button onClick={() => { setGenerated(false); setRevealing(-1); setLiveBriefing(null); }} style={{ background: 'transparent', color: PURPLE, border: `1px solid ${PURPLE}`, padding: '10px 24px', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+                    <button onClick={() => { setGenerated(false); setRevealing(-1); setAiInsights({}); }} style={{ background: 'transparent', color: PURPLE, border: `1px solid ${PURPLE}`, padding: '10px 24px', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
                       ↻ Regenerate Briefing
                     </button>
-                    <button onClick={refreshWithAI} disabled={liveLoading} style={{ background: PURPLE, color: '#fff', border: 'none', padding: '10px 24px', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer', opacity: liveLoading ? 0.6 : 1, display: 'flex', alignItems: 'center', gap: 8 }}>
-                      {liveLoading ? (
-                        <><div style={{ width: 14, height: 14, border: '2px solid #fff', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} /> Generating live briefing...</>
-                      ) : '🔄 Refresh with Live AI'}
+                    <button onClick={refreshAllWithAI} disabled={anyLoading} style={{ background: PURPLE, color: '#fff', border: 'none', padding: '10px 24px', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer', opacity: anyLoading ? 0.6 : 1, display: 'flex', alignItems: 'center', gap: 8 }}>
+                      {anyLoading ? (
+                        <><div style={{ width: 14, height: 14, border: '2px solid #fff', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} /> Generating insights...</>
+                      ) : '🤖 Add AI Insights to Each Section'}
                     </button>
                   </div>
-                  {liveBriefing && (
-                    <div style={{ marginTop: 16, padding: 22, background: '#fff', borderRadius: 12, border: `1px solid ${PURPLE}44`, animation: 'fadeIn 0.4s ease' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-                        <h3 style={{ fontSize: 15, fontWeight: 700, color: PURPLE, margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
-                          🤖 Live AI Briefing
-                        </h3>
-                        <span style={{ fontSize: 10, color: PURPLE, background: PURPLE_BG, padding: '2px 8px', borderRadius: 4, fontWeight: 500 }}>Generated live via Claude API</span>
-                      </div>
-                      <div style={{ fontSize: 14, color: '#374151', lineHeight: 1.7 }}>
-                        {renderMarkdown(liveBriefing)}
-                      </div>
-                    </div>
-                  )}
                 </div>
               )}
             </div>
