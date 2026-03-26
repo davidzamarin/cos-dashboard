@@ -696,22 +696,41 @@
                 <div style={{ fontSize: 14, fontWeight: 700, color: '#111' }}>5-15 min: Pre-Read Review</div>
                 <div style={{ fontSize: 12, background: PURPLE_BG, color: PURPLE, padding: '4px 10px', borderRadius: 6, fontWeight: 600 }}>10 min</div>
               </div>
-              <div style={{ background: '#fff', border: `1px solid #E5E7EB`, borderRadius: 10, padding: 16 }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: PURPLE, marginBottom: 8, textTransform: 'uppercase' }}>1-Page Decision Brief Template</div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, fontSize: 13 }}>
-                  <div><strong>Decision Needed</strong><br /><span style={{ color: '#6B7280' }}>What choice does the team make?</span></div>
-                  <div><strong>Owner</strong><br /><span style={{ color: '#6B7280' }}>Who owns implementation?</span></div>
-                  <div style={{ gridColumn: '1 / -1' }}><strong>Context</strong><br /><span style={{ color: '#6B7280' }}>3 sentences max. Background + why now.</span></div>
-                  <div style={{ gridColumn: '1 / -1' }}><strong>Options (max 3)</strong><br /><span style={{ color: '#6B7280' }}>Option A | Option B | Option C</span></div>
-                  <div style={{ gridColumn: '1 / -1' }}><strong>Recommendation</strong><br /><span style={{ color: '#6B7280' }}>Owner's recommended path + rationale.</span></div>
+              <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 12 }}>Replaces the 6-page Amazon-style doc. One page, one decision, structured for fast alignment. The presenter fills this out before the meeting - the team reads it in the first 10 minutes, then discusses.</div>
+              <div style={{ background: '#fff', border: `1px solid ${PURPLE}44`, borderRadius: 10, padding: 20 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: PURPLE }}>1-Page Decision Brief</div>
+                  <span style={{ fontSize: 10, color: '#9CA3AF', background: '#F3F4F6', padding: '2px 8px', borderRadius: 4 }}>Example - Cinapse Integration</span>
                 </div>
-              </div>
-              <div style={{ marginTop: 12, background: PURPLE_BG, borderRadius: 10, padding: 14 }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: PURPLE, marginBottom: 8 }}>Mock Example: Cinapse Integration Timeline</div>
-                <div style={{ fontSize: 13, color: '#111', lineHeight: 1.6 }}>
-                  <strong>Decision:</strong> Ship Cinapse + Core AP Automation in Q2 vs. wait until Cinapse data migration complete.<br />
-                  <strong>Context:</strong> Cinapse acquired Dec 2025. Addresses 64% pain point (disconnected systems). Engineering capacity: 2-5x faster with AI tooling.<br />
-                  <strong>Recommendation:</strong> Ship core AP automation in Q2, extend Cinapse integration into Q3 to derisk.
+                <div style={{ marginBottom: 14, paddingBottom: 14, borderBottom: '1px solid #F3F4F6' }}>
+                  <div style={{ fontSize: 11, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Decision Needed</div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: '#111' }}>Should we ship Cinapse integration alongside Core AP Automation in Q2, or decouple them and extend Cinapse into Q3?</div>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14, paddingBottom: 14, borderBottom: '1px solid #F3F4F6' }}>
+                  <div>
+                    <div style={{ fontSize: 11, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Owner</div>
+                    <div style={{ fontSize: 13, color: '#111' }}>Naysawn Naji (CIO)</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 11, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Deadline</div>
+                    <div style={{ fontSize: 13, color: '#111' }}>Decision by March 28, 2026</div>
+                  </div>
+                </div>
+                <div style={{ marginBottom: 14, paddingBottom: 14, borderBottom: '1px solid #F3F4F6' }}>
+                  <div style={{ fontSize: 11, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Context (3 sentences max)</div>
+                  <div style={{ fontSize: 13, color: '#374151', lineHeight: 1.6 }}>Cinapse was acquired Dec 2025 to strengthen production accounting. 64% of finance leaders cite disconnected systems as their #1 barrier to cash flow prediction. Engineering is shipping 2-5x faster with AI tooling, but product capacity is a bottleneck at 80% vs. 130% demand.</div>
+                </div>
+                <div style={{ marginBottom: 14, paddingBottom: 14, borderBottom: '1px solid #F3F4F6' }}>
+                  <div style={{ fontSize: 11, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Options (max 3)</div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    <div style={{ fontSize: 13, color: '#374151', padding: '8px 12px', background: '#F9FAFB', borderRadius: 6 }}><strong>A.</strong> Ship both in Q2. Risk: data migration may not be complete, product team stretched thin.</div>
+                    <div style={{ fontSize: 13, color: '#374151', padding: '8px 12px', background: PURPLE_BG, borderRadius: 6, border: `1px solid ${PURPLE}22` }}><strong>B.</strong> Ship AP Automation in Q2, extend Cinapse to Q3. Derisks delivery. Lets product team focus. <span style={{ color: PURPLE, fontWeight: 600 }}>(Recommended)</span></div>
+                    <div style={{ fontSize: 13, color: '#374151', padding: '8px 12px', background: '#F9FAFB', borderRadius: 6 }}><strong>C.</strong> Delay both to Q3. Safest, but loses first-mover advantage on AP automation and momentum from Paramount/Unrealistic Ideas results.</div>
+                  </div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 11, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Recommendation & Rationale</div>
+                  <div style={{ fontSize: 13, color: '#374151', lineHeight: 1.6 }}>Option B. AP Automation has proven customer traction (Paramount, Unrealistic Ideas) and should not wait on Cinapse data migration. Decoupling lets Dan's engineering team maintain velocity on AP while product scopes the Cinapse integration properly. Jeff's sales pipeline at 2.3x needs AP automation as a closer - delaying it risks deals.</div>
                 </div>
               </div>
             </div>
